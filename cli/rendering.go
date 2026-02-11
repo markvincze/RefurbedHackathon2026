@@ -6,6 +6,7 @@ import (
 	"github.com/NimbleMarkets/ntcharts/barchart"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/yarlson/tap"
+	"refurbed.com/hackathon/reporting"
 )
 
 type stat struct {
@@ -111,17 +112,23 @@ func renderRevenueByWeekGraph(data []stat) {
 	fmt.Println(bc.View())
 }
 
-func renderReturnRateByCategory() {
+func renderReturnRateByCategory(dataset *reporting.OrderDataset) {
 	fmt.Println("Revenue by day")
 	fmt.Println()
-	data := []stat{
-		{"Electronics>Phones>Android", 0.12},
-		{"Home>Kitchen>Coffee", 0.25},
-		{"Electronics>Laptops>Ultrabooks", 0.04},
-		{"Electronics>Phones>iPhone", 0.16},
-		{"Electronics>Wearables>Smartwatch", 0.18},
-		{"Electronics>Tablets>iPad", 0.8},
+
+	data := make([]stat, 0)
+
+	for _, c := range dataset.AllCategories() {
+		data = append(data, stat{string(c), dataset.ReturnRateByCategory(c)})
 	}
+	// data := []stat{
+	// 	{"Electronics>Phones>Android", 0.12},
+	// 	{"Home>Kitchen>Coffee", 0.25},
+	// 	{"Electronics>Laptops>Ultrabooks", 0.04},
+	// 	{"Electronics>Phones>iPhone", 0.16},
+	// 	{"Electronics>Wearables>Smartwatch", 0.18},
+	// 	{"Electronics>Tablets>iPad", 0.8},
+	// }
 
 	renderReturnRateByCategoryTable(data)
 	renderReturnRateByCategoryGraph(data)
@@ -151,10 +158,13 @@ func renderReturnRateByCategoryGraph(data []stat) {
 
 	bc := barchart.New(
 		140, 15,
-		barchart.WithDataSet(values),
-		barchart.WithHorizontalBars())
-	// bc.SetShowAxis(true)
-	// bc.PushAll(values)
+		barchart.WithDataSet(values))
+
+	// bc := barchart.New(
+	// 	140, len(data)*2,
+	// 	barchart.WithDataSet(values),
+	// 	barchart.WithHorizontalBars())
+
 	bc.Draw()
 
 	fmt.Println(bc.View())
