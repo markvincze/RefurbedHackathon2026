@@ -65,6 +65,8 @@ func main() {
 			renderRevenueByWeek()
 		case "ReturnRateByCategory":
 			renderReturnRateByCategory(dataset)
+		case "OrderCountByCategory":
+			renderOrderCountByCategory(dataset)
 		case "Quit":
 			return
 		}

@@ -49,12 +49,12 @@ func renderRevenueByDayTable(data []stat) {
 
 func renderRevenueByDayGraph(data []stat) {
 	values := make([]barchart.BarData, 0)
-	for _, dayAndValue := range data {
+	for _, stat := range data {
 		values = append(
 			values,
 			barchart.BarData{
-				Label:  dayAndValue.x,
-				Values: []barchart.BarValue{{Name: "Revenue", Value: dayAndValue.y, Style: blockStyle}}})
+				Label:  stat.x,
+				Values: []barchart.BarValue{{Name: "Revenue", Value: stat.y, Style: blockStyle}}})
 	}
 
 	bc := barchart.New(140, 15)
@@ -66,7 +66,7 @@ func renderRevenueByDayGraph(data []stat) {
 }
 
 func renderRevenueByWeek() {
-	fmt.Println("Revenue by day")
+	fmt.Println("Revenue by week")
 	fmt.Println()
 	data := []stat{
 		{"2026.02.09", 120},
@@ -96,12 +96,12 @@ func renderRevenueByWeekTable(data []stat) {
 
 func renderRevenueByWeekGraph(data []stat) {
 	values := make([]barchart.BarData, 0)
-	for _, dayAndValue := range data {
+	for _, stat := range data {
 		values = append(
 			values,
 			barchart.BarData{
-				Label:  dayAndValue.x,
-				Values: []barchart.BarValue{{Name: "Revenue", Value: dayAndValue.y, Style: blockStyle}}})
+				Label:  stat.x,
+				Values: []barchart.BarValue{{Name: "Revenue", Value: stat.y, Style: blockStyle}}})
 	}
 
 	bc := barchart.New(140, 15)
@@ -113,7 +113,7 @@ func renderRevenueByWeekGraph(data []stat) {
 }
 
 func renderReturnRateByCategory(dataset *reporting.OrderDataset) {
-	fmt.Println("Revenue by day")
+	fmt.Println("Return rate by category")
 	fmt.Println()
 
 	data := make([]stat, 0)
@@ -140,16 +140,66 @@ func renderReturnRateByCategoryTable(data []stat) {
 
 func renderReturnRateByCategoryGraph(data []stat) {
 	values := make([]barchart.BarData, 0)
-	for _, dayAndValue := range data {
+	for _, stat := range data {
 		values = append(
 			values,
 			barchart.BarData{
-				Label:  dayAndValue.x,
-				Values: []barchart.BarValue{{Name: "Return rate", Value: dayAndValue.y, Style: blockStyle}}})
+				Label:  stat.x,
+				Values: []barchart.BarValue{{Name: "Return rate", Value: stat.y, Style: blockStyle}}})
 	}
 
 	bc := barchart.New(
 		140, 15,
+		barchart.WithDataSet(values))
+
+	// bc := barchart.New(
+	// 	140, len(data)*2,
+	// 	barchart.WithDataSet(values),
+	// 	barchart.WithHorizontalBars())
+
+	bc.Draw()
+
+	fmt.Println(bc.View())
+}
+
+func renderOrderCountByCategory(dataset *reporting.OrderDataset) {
+	fmt.Println("Order count by category")
+	fmt.Println()
+
+	data := make([]stat, 0)
+
+	for _, c := range dataset.AllCategories() {
+		data = append(data, stat{string(c), float64(dataset.NumOrdersByCategory(c))})
+	}
+
+	renderOrderCountByCategoryTable(data)
+	renderOrderCountByCategoryGraph(data)
+}
+
+func renderOrderCountByCategoryTable(data []stat) {
+	textData := make([][]string, 0)
+	for _, d := range data {
+		textData = append(textData, []string{d.x, fmt.Sprintf("%d", int(d.y))})
+	}
+
+	tap.Table(
+		[]string{"Category", "Order count"},
+		textData,
+		tap.TableOptions{ShowBorders: true, HeaderStyle: tap.TableStyleBold})
+}
+
+func renderOrderCountByCategoryGraph(data []stat) {
+	values := make([]barchart.BarData, 0)
+	for _, stat := range data {
+		values = append(
+			values,
+			barchart.BarData{
+				Label:  stat.x,
+				Values: []barchart.BarValue{{Name: "Order count", Value: stat.y, Style: blockStyle}}})
+	}
+
+	bc := barchart.New(
+		160, 15,
 		barchart.WithDataSet(values))
 
 	// bc := barchart.New(
