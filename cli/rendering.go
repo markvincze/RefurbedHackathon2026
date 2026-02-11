@@ -18,6 +18,8 @@ var blockStyle = lipgloss.NewStyle().
 	Background(lipgloss.Color("3"))
 
 func renderRevenueByDay() {
+	fmt.Println("Revenue by day")
+	fmt.Println()
 	data := []stat{
 		stat{"2026.01.01", 120},
 		stat{"2026.01.02", 112},
@@ -51,10 +53,11 @@ func renderRevenueByDayGraph(data []stat) {
 			values,
 			barchart.BarData{
 				Label:  dayAndValue.date,
-				Values: []barchart.BarValue{{Name: "Name1", Value: dayAndValue.revenue, Style: blockStyle}}})
+				Values: []barchart.BarValue{{Name: "Revenue", Value: dayAndValue.revenue, Style: blockStyle}}})
 	}
 
-	bc := barchart.New(140, 10)
+	bc := barchart.New(140, 15)
+	bc.SetShowAxis(true)
 	bc.PushAll(values)
 	bc.Draw()
 
