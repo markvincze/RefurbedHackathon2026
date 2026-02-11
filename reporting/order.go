@@ -1,9 +1,11 @@
 package reporting
 
 import (
+	"fmt"
 	"iter"
 	"maps"
 	"slices"
+	"sort"
 	"sync"
 	"time"
 
@@ -151,4 +153,64 @@ func (ds *OrderDataset) AOV() decimal.Decimal {
 		ds.aov = total.Div(decimal.NewFromInt(int64(len(ds.orders))))
 	})
 	return ds.aov
+}
+
+type IntervalRevenue struct {
+	Start   time.Time
+	End     time.Time
+	Title   string
+	Revenue decimal.Decimal
+}
+
+func (ds *OrderDataset) RevenueByDay(start, end time.Time) []IntervalRevenue {
+	return ds.revenueByTimeInterval(start, end, 24*time.Hour, func(from, to time.Time) string {
+		return fmt.Sprintf("Day %s", from.Format("2006-01-02"))
+	})
+}
+
+func (ds *OrderDataset) RevenueByWeek(start, end time.Time) []IntervalRevenue {
+	return ds.revenueByTimeInterval(start, end, 7*24*time.Hour, func(from, to time.Time) string {
+		return fmt.Sprintf("Week %s - %s", from.Format("2006-01-02"), to.Format("2006-01-02"))
+	})
+}
+
+func (ds *OrderDataset) revenueByTimeInterval(start, end time.Time, interval time.Duration, titleFn func(from, to time.Time) string) []IntervalRevenue {
+	intervalGroups := make(map[time.Time]decimal.Decimal)
+	for date := start.Truncate(interval); date.Before(end) || date.Equal(end); date = date.Add(interval) {
+		intervalGroups[date] = decimal.Zero
+	}
+
+	startTrunc := start.Truncate(interval)
+	endTrunc := end.Truncate(interval)
+
+	for item := range ds.AllItems() {
+		date := item.OrderedAt.Truncate(interval)
+		if dateInInterval(date, startTrunc, endTrunc) {
+			intervalGroups[date] = intervalGroups[date].Add(item.ItemPrice).Sub(item.Refunded)
+		}
+	}
+
+	res := make([]IntervalRevenue, 0, len(intervalGroups))
+	for date, revenue := range intervalGroups {
+		res = append(res, IntervalRevenue{
+			Start:   date,
+			End:     date.Add(interval),
+			Title:   titleFn(date, date.Add(interval)),
+			Revenue: revenue,
+		})
+	}
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].Start.Before(res[j].Start)
+	})
+	return res
+}
+
+func dateInInterval(date time.Time, start, end time.Time) bool {
+	if date.Equal(start) || date.Equal(end) {
+		return true
+	}
+	if date.After(start) && date.Before(end) {
+		return true
+	}
+	return false
 }
