@@ -50,27 +50,49 @@ func (m model) View() string {
 }
 
 func main() {
-	tap.Intro("Welcome to order data visualizer!")
+	for {
+		clearScreen()
+		tap.Intro("Welcome to order data visualizer!")
 
-	tap.Message("AOV: TODO")
-	tap.Message("Total revenue: TODO")
-	tap.Message("Delivery days median: TODO, p95: TODO")
-	tap.Message("Return rate: TODO")
+		spinner := tap.NewSpinner(tap.SpinnerOptions{})
+		spinner.Start("Loading the dataset...")
+		time.Sleep(2 * time.Second)
+		spinner.Stop("Loading complete", 0)
 
-	options := []tap.SelectOption[string]{
-		{Value: "RevenueByDay", Label: "Revenue by day", Hint: ""},
-		{Value: "RevenueByWeek", Label: "Revenue by week", Hint: ""},
-		{Value: "ReturnRateByCategory", Label: "Return rate by category", Hint: ""},
-		{Value: "OrderCountByCategory", Label: "Order count by category and subcategory", Hint: ""},
-		{Value: "QueryBuilder", Label: "Query builder", Hint: "Create custom query"},
+		tap.Message("AOV: TODO")
+		tap.Message("Total revenue: TODO")
+		tap.Message("Delivery days median: TODO, p95: TODO")
+		tap.Message("Return rate: TODO")
+
+		options := []tap.SelectOption[string]{
+			{Value: "RevenueByDay", Label: "Revenue by day", Hint: ""},
+			{Value: "RevenueByWeek", Label: "Revenue by week", Hint: ""},
+			{Value: "ReturnRateByCategory", Label: "Return rate by category", Hint: ""},
+			{Value: "OrderCountByCategory", Label: "Order count by category and subcategory", Hint: ""},
+			{Value: "QueryBuilder", Label: "Query builder", Hint: "Create custom query"},
+			{Value: "Quit", Label: "Quit"},
+		}
+
+		result := tap.Select[string](context.Background(), tap.SelectOptions[string]{
+			Message: "Select from the below options:",
+			Options: options,
+		})
+
+		clearScreen()
+
+		switch result {
+		case "RevenueByDay":
+			renderRevenueByDay()
+		case "Quit":
+			return
+		}
+
+		tap.Text(context.Background(), tap.TextOptions{Message: "Press Enter to return to menu"})
 	}
+}
 
-	result := tap.Select[string](context.Background(), tap.SelectOptions[string]{
-		Message: "Select from the below options:",
-		Options: options,
-	})
-
-	fmt.Printf("You selected: %s\n", result)
+func clearScreen() {
+	fmt.Print("\033[H\033[2J")
 }
 
 func drawGraph() {
