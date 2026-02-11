@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/NimbleMarkets/ntcharts/barchart"
 	"github.com/charmbracelet/lipgloss"
@@ -18,17 +19,17 @@ var blockStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("3")).
 	Background(lipgloss.Color("3"))
 
-func renderRevenueByDay() {
+func renderRevenueByDay(dataset *reporting.OrderDataset) {
 	fmt.Println("Revenue by day")
 	fmt.Println()
-	data := []stat{
-		{"2026.01.01", 120},
-		{"2026.01.02", 112},
-		{"2026.01.03", 270},
-		{"2026.01.04", 178},
-		{"2026.01.05", 153},
-		{"2026.01.06", 240},
-		{"2026.01.07", 225},
+
+	today := time.Date(2025, 10, 22, 0, 0, 0, 0, time.UTC)
+
+	data := make([]stat, 0)
+	rbd := dataset.RevenueByDay(today.AddDate(0, 0, -8), today.AddDate(0, 0, -1))
+
+	for _, r := range rbd {
+		data = append(data, stat{r.Title, r.Revenue.InexactFloat64()})
 	}
 
 	renderRevenueByDayTable(data)
@@ -65,18 +66,27 @@ func renderRevenueByDayGraph(data []stat) {
 	fmt.Println(bc.View())
 }
 
-func renderRevenueByWeek() {
+func renderRevenueByWeek(dataset *reporting.OrderDataset) {
 	fmt.Println("Revenue by week")
 	fmt.Println()
-	data := []stat{
-		{"2026.02.09", 120},
-		{"2026.02.02", 112},
-		{"2026.01.26", 270},
-		{"2026.01.19", 178},
-		{"2026.01.12", 153},
-		{"2026.01.5", 240},
-		{"2025.12.29", 225},
+	today := time.Date(2025, 10, 22, 0, 0, 0, 0, time.UTC)
+
+	data := make([]stat, 0)
+	rbd := dataset.RevenueByWeek(today.AddDate(0, 0, -(7*7)-1), today.AddDate(0, 0, -1))
+
+	for _, r := range rbd {
+		data = append(data, stat{r.Title, r.Revenue.InexactFloat64()})
 	}
+
+	// data := []stat{
+	// 	{"2026.02.09", 120},
+	// 	{"2026.02.02", 112},
+	// 	{"2026.01.26", 270},
+	// 	{"2026.01.19", 178},
+	// 	{"2026.01.12", 153},
+	// 	{"2026.01.5", 240},
+	// 	{"2025.12.29", 225},
+	// }
 
 	renderRevenueByWeekTable(data)
 	renderRevenueByWeekGraph(data)
