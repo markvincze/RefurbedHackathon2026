@@ -21,13 +21,13 @@ func renderRevenueByDay() {
 	fmt.Println("Revenue by day")
 	fmt.Println()
 	data := []stat{
-		stat{"2026.01.01", 120},
-		stat{"2026.01.02", 112},
-		stat{"2026.01.03", 270},
-		stat{"2026.01.04", 178},
-		stat{"2026.01.05", 153},
-		stat{"2026.01.06", 240},
-		stat{"2026.01.07", 225},
+		{"2026.01.01", 120},
+		{"2026.01.02", 112},
+		{"2026.01.03", 270},
+		{"2026.01.04", 178},
+		{"2026.01.05", 153},
+		{"2026.01.06", 240},
+		{"2026.01.07", 225},
 	}
 
 	renderRevenueByDayTable(data)
@@ -57,6 +57,99 @@ func renderRevenueByDayGraph(data []stat) {
 	}
 
 	bc := barchart.New(140, 15)
+	bc.SetShowAxis(true)
+	bc.PushAll(values)
+	bc.Draw()
+
+	fmt.Println(bc.View())
+}
+
+func renderRevenueByWeek() {
+	fmt.Println("Revenue by day")
+	fmt.Println()
+	data := []stat{
+		{"2026.02.09", 120},
+		{"2026.02.02", 112},
+		{"2026.01.26", 270},
+		{"2026.01.19", 178},
+		{"2026.01.12", 153},
+		{"2026.01.5", 240},
+		{"2025.12.29", 225},
+	}
+
+	renderRevenueByWeekTable(data)
+	renderRevenueByWeekGraph(data)
+}
+
+func renderRevenueByWeekTable(data []stat) {
+	textData := make([][]string, 0)
+	for _, d := range data {
+		textData = append(textData, []string{d.date, fmt.Sprintf("€ %f", d.revenue)})
+	}
+
+	tap.Table(
+		[]string{"Week", "Revenue"},
+		textData,
+		tap.TableOptions{ShowBorders: true, HeaderStyle: tap.TableStyleBold})
+}
+
+func renderRevenueByWeekGraph(data []stat) {
+	values := make([]barchart.BarData, 0)
+	for _, dayAndValue := range data {
+		values = append(
+			values,
+			barchart.BarData{
+				Label:  dayAndValue.date,
+				Values: []barchart.BarValue{{Name: "Revenue", Value: dayAndValue.revenue, Style: blockStyle}}})
+	}
+
+	bc := barchart.New(140, 15)
+	bc.SetShowAxis(true)
+	bc.PushAll(values)
+	bc.Draw()
+
+	fmt.Println(bc.View())
+}
+
+func renderReturnRateByCategory() {
+	fmt.Println("Revenue by day")
+	fmt.Println()
+	data := []stat{
+		{"Electronics>Phones>Android", 0.12},
+		{"Home>Kitchen>Coffee", 0.25},
+		{"Electronics>Laptops>Ultrabooks", 0.04},
+		{"Electronics>Phones>iPhone", 0.16},
+		{"Electronics>Wearables>Smartwatch", 0.18},
+		{"Electronics>Tablets>iPad", 0.8},
+	}
+
+	renderReturnRateByCategoryTable(data)
+	renderReturnRateByCategoryGraph(data)
+}
+
+func renderReturnRateByCategoryTable(data []stat) {
+	textData := make([][]string, 0)
+	for _, d := range data {
+		textData = append(textData, []string{d.date, fmt.Sprintf("%d%%", (int)(100*d.revenue))})
+	}
+
+	tap.Table(
+		[]string{"Category", "Return rate"},
+		textData,
+		tap.TableOptions{ShowBorders: true, HeaderStyle: tap.TableStyleBold})
+}
+
+func renderReturnRateByCategoryGraph(data []stat) {
+	values := make([]barchart.BarData, 0)
+	for _, dayAndValue := range data {
+		values = append(
+			values,
+			barchart.BarData{
+				Label:  dayAndValue.date,
+				Values: []barchart.BarValue{{Name: "Return rate", Value: dayAndValue.revenue, Style: blockStyle}}})
+	}
+
+	bc := barchart.New(140, 15, barchart.WithHorizontalBars())
 	bc.SetShowAxis(true)
 	bc.PushAll(values)
 	bc.Draw()

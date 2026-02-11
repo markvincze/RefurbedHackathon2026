@@ -83,6 +83,10 @@ func main() {
 		switch result {
 		case "RevenueByDay":
 			renderRevenueByDay()
+		case "RevenueByWeek":
+			renderRevenueByWeek()
+		case "ReturnRateByCategory":
+			renderReturnRateByCategory()
 		case "Quit":
 			return
 		}
