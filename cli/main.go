@@ -56,7 +56,7 @@ func main() {
 
 		spinner := tap.NewSpinner(tap.SpinnerOptions{})
 		spinner.Start("Loading the dataset...")
-		time.Sleep(2 * time.Second)
+		time.Sleep(100 * time.Millisecond)
 		spinner.Stop("Loading complete", 0)
 
 		tap.Message("AOV: TODO")
