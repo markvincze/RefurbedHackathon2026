@@ -15,3 +15,5 @@ And provide menu items for opening the graphs:
 
 And the last option is the custom query functionality?
 - 5) Create custom query
+
+No AI allowed.
