@@ -41,10 +41,12 @@ type ItemSpec struct {
 }
 
 type OrderDataset struct {
-	allItems   []OrderItem
-	orders     map[OrderID][]OrderItem
-	features   features
-	categories map[Category]struct{}
+	allItems          []OrderItem
+	orders            map[OrderID][]OrderItem
+	features          features
+	categories        map[Category]struct{}
+	earliestOrderedAt time.Time
+	latestOrderedAt   time.Time
 
 	totalGross   decimal.Decimal
 	totalRevenue decimal.Decimal
@@ -73,6 +75,12 @@ func (ds *OrderDataset) AllOrders() iter.Seq[Order] {
 }
 
 func (ds *OrderDataset) add(item OrderItem) {
+	if ds.earliestOrderedAt.IsZero() || item.OrderedAt.Before(ds.earliestOrderedAt) {
+		ds.earliestOrderedAt = item.OrderedAt
+	}
+	if ds.latestOrderedAt.IsZero() || item.OrderedAt.After(ds.latestOrderedAt) {
+		ds.latestOrderedAt = item.OrderedAt
+	}
 	itemID := orderItemID(len(ds.allItems))
 	ds.allItems = append(ds.allItems, item)
 	ds.orders[item.OrderID] = append(ds.orders[item.OrderID], item)
@@ -123,6 +131,10 @@ func (ds *OrderDataset) AllCategories() []Category {
 	all := slices.Collect(maps.Keys(ds.categories))
 	slices.Sort(all)
 	return all
+}
+
+func (ds *OrderDataset) DateRange() (earliestOrderedAt, latestOrderedAt time.Time) {
+	return ds.earliestOrderedAt, ds.latestOrderedAt
 }
 
 func (ds *OrderDataset) NumOrdersByCategory(cat Category) int {

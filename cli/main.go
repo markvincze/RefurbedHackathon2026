@@ -14,7 +14,7 @@ func main() {
 
 	for {
 		clearScreen()
-		tap.Intro("Welcome to order data visualizer!")
+		tap.Intro("Welcome to the order data visualizer!")
 
 		if dataset == nil {
 			spinner := tap.NewSpinner(tap.SpinnerOptions{})
@@ -60,9 +60,9 @@ func main() {
 
 		switch result {
 		case "RevenueByDay":
-			renderRevenueByDay()
+			renderRevenueByDay(dataset)
 		case "RevenueByWeek":
-			renderRevenueByWeek()
+			renderRevenueByWeek(dataset)
 		case "ReturnRateByCategory":
 			renderReturnRateByCategory(dataset)
 		case "OrderCountByCategory":
