@@ -155,6 +155,14 @@ func (ds *OrderDataset) AOV() decimal.Decimal {
 	return ds.aov
 }
 
+func (ds *OrderDataset) TotalRevenue() decimal.Decimal {
+	var total decimal.Decimal
+	for item := range ds.AllItems() {
+		total = total.Add(item.ItemPrice).Sub(item.Refunded)
+	}
+	return total
+}
+
 type IntervalRevenue struct {
 	Start   time.Time
 	End     time.Time
