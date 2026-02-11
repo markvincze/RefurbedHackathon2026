@@ -149,9 +149,12 @@ func renderReturnRateByCategoryGraph(data []stat) {
 				Values: []barchart.BarValue{{Name: "Return rate", Value: dayAndValue.revenue, Style: blockStyle}}})
 	}
 
-	bc := barchart.New(140, 15, barchart.WithHorizontalBars())
-	bc.SetShowAxis(true)
-	bc.PushAll(values)
+	bc := barchart.New(
+		140, 15,
+		barchart.WithDataSet(values),
+		barchart.WithHorizontalBars())
+	// bc.SetShowAxis(true)
+	// bc.PushAll(values)
 	bc.Draw()
 
 	fmt.Println(bc.View())
