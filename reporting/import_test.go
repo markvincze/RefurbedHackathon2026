@@ -17,5 +17,13 @@ func TestImportOrderDatasetFromCSV(t *testing.T) {
 	dataset, err := reporting.ImportOrderDatasetFromCSV(in)
 	require.NoError(t, err)
 
-	t.Log(dataset.AOV())
+	t.Log("NumOrderItems", dataset.NumOrderItems())
+	t.Log("NumOrders", dataset.NumOrders())
+	t.Log("AOV", dataset.AOV())
+
+	for _, cat := range dataset.AllCategories() {
+		t.Log("Orders By Category:", cat, dataset.NumOrdersByCategory(cat))
+		t.Log("Return Rate By Category:", cat, dataset.ReturnRateByCategory(cat))
+	}
+
 }
