@@ -33,6 +33,14 @@ type OrderItem struct {
 	Category       []Category
 }
 
+func (r OrderItem) DeliveredIn() time.Duration {
+	duration := r.DeliveredAt.Sub(r.OrderedAt)
+	if duration <= 0 {
+		return 0
+	}
+	return duration
+}
+
 type orderItemID = int32
 
 type ItemSpec struct {
@@ -51,6 +59,9 @@ type OrderDataset struct {
 	totalGross    decimal.Decimal
 	totalRevenue  decimal.Decimal
 	totalReturned int64
+
+	deliveryDurations       []time.Duration
+	sortedDeliveryDurations []time.Duration
 }
 
 type features struct {
@@ -127,6 +138,7 @@ func (ds *OrderDataset) add(item OrderItem) {
 		}
 		orderItemCategoryBitmap.Add(uint32(itemID))
 	}
+	ds.deliveryDurations = append(ds.deliveryDurations, item.DeliveredIn())
 }
 
 func (ds *OrderDataset) AllCategories() []Category {
@@ -169,6 +181,17 @@ func (ds *OrderDataset) TotalRevenue() decimal.Decimal {
 
 func (ds *OrderDataset) ReturnRate() decimal.Decimal {
 	return decimal.NewFromInt(ds.totalReturned).Div(decimal.NewFromInt(int64(len(ds.allItems)))).Mul(decimal.NewFromInt(100))
+}
+
+func (ds *OrderDataset) MedianDelivery() time.Duration {
+	l := len(ds.sortedDeliveryDurations)
+	if l == 0 {
+		return 0
+	}
+	if l%2 == 0 {
+		return (ds.sortedDeliveryDurations[l/2-1] + ds.sortedDeliveryDurations[l/2]) / 2
+	}
+	return ds.sortedDeliveryDurations[l/2]
 }
 
 type IntervalRevenue struct {
