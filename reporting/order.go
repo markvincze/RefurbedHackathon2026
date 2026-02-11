@@ -6,7 +6,6 @@ import (
 	"maps"
 	"slices"
 	"sort"
-	"sync"
 	"time"
 
 	"github.com/RoaringBitmap/roaring"
@@ -47,8 +46,7 @@ type OrderDataset struct {
 	features   features
 	categories map[Category]struct{}
 
-	aovOnce      sync.Once
-	aov          decimal.Decimal
+	totalGross   decimal.Decimal
 	totalRevenue decimal.Decimal
 }
 
@@ -78,6 +76,7 @@ func (ds *OrderDataset) add(item OrderItem) {
 	itemID := orderItemID(len(ds.allItems))
 	ds.allItems = append(ds.allItems, item)
 	ds.orders[item.OrderID] = append(ds.orders[item.OrderID], item)
+	ds.totalGross = ds.totalGross.Add(item.ItemPrice)
 	ds.totalRevenue = ds.totalRevenue.Add(item.ItemPrice).Sub(item.Refunded)
 
 	if ds.features.returned == nil {
@@ -147,14 +146,7 @@ func (ds *OrderDataset) NumOrders() int {
 }
 
 func (ds *OrderDataset) AOV() decimal.Decimal {
-	ds.aovOnce.Do(func() {
-		total := decimal.Zero
-		for item := range ds.AllItems() {
-			total = total.Add(item.ItemPrice)
-		}
-		ds.aov = total.Div(decimal.NewFromInt(int64(len(ds.orders))))
-	})
-	return ds.aov
+	return ds.totalGross.Div(decimal.NewFromInt(int64(len(ds.orders))))
 }
 
 func (ds *OrderDataset) TotalRevenue() decimal.Decimal {
