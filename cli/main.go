@@ -4,36 +4,38 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/yarlson/tap"
 	"refurbed.com/hackathon/reporting"
 )
 
 func main() {
+	var dataset *reporting.OrderDataset
+
 	for {
 		clearScreen()
 		tap.Intro("Welcome to order data visualizer!")
 
-		spinner := tap.NewSpinner(tap.SpinnerOptions{})
-		spinner.Start("Loading the dataset...")
+		if dataset == nil {
+			spinner := tap.NewSpinner(tap.SpinnerOptions{})
+			spinner.Start("Loading the dataset...")
 
-		in, err := os.Open("orders_v3.csv")
+			in, err := os.Open("orders_v3.csv")
 
-		if err != nil {
-			fmt.Printf("Opening the file failed: %v", err)
-			return
+			if err != nil {
+				fmt.Printf("Opening the file failed: %v", err)
+				return
+			}
+
+			dataset, err = reporting.ImportOrderDatasetFromCSV(in)
+
+			if err != nil {
+				fmt.Printf("Processing the data failed: %v", err)
+				return
+			}
+
+			spinner.Stop("Loading complete", 0)
 		}
-
-		dataset, err := reporting.ImportOrderDatasetFromCSV(in)
-
-		if err != nil {
-			fmt.Printf("Processing the data failed: %v", err)
-			return
-		}
-
-		time.Sleep(100 * time.Millisecond)
-		spinner.Stop("Loading complete", 0)
 
 		tap.Message(fmt.Sprintf("AOV: %v", dataset.AOV()))
 		tap.Message("Total revenue: TODO")
@@ -62,7 +64,7 @@ func main() {
 		case "RevenueByWeek":
 			renderRevenueByWeek()
 		case "ReturnRateByCategory":
-			renderReturnRateByCategory()
+			renderReturnRateByCategory(dataset)
 		case "Quit":
 			return
 		}

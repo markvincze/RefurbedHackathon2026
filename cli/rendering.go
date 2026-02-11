@@ -6,11 +6,12 @@ import (
 	"github.com/NimbleMarkets/ntcharts/barchart"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/yarlson/tap"
+	"refurbed.com/hackathon/reporting"
 )
 
 type stat struct {
-	date    string
-	revenue float64
+	x string
+	y float64
 }
 
 var blockStyle = lipgloss.NewStyle().
@@ -37,7 +38,7 @@ func renderRevenueByDay() {
 func renderRevenueByDayTable(data []stat) {
 	textData := make([][]string, 0)
 	for _, d := range data {
-		textData = append(textData, []string{d.date, fmt.Sprintf("€ %f", d.revenue)})
+		textData = append(textData, []string{d.x, fmt.Sprintf("€ %f", d.y)})
 	}
 
 	tap.Table(
@@ -52,8 +53,8 @@ func renderRevenueByDayGraph(data []stat) {
 		values = append(
 			values,
 			barchart.BarData{
-				Label:  dayAndValue.date,
-				Values: []barchart.BarValue{{Name: "Revenue", Value: dayAndValue.revenue, Style: blockStyle}}})
+				Label:  dayAndValue.x,
+				Values: []barchart.BarValue{{Name: "Revenue", Value: dayAndValue.y, Style: blockStyle}}})
 	}
 
 	bc := barchart.New(140, 15)
@@ -84,7 +85,7 @@ func renderRevenueByWeek() {
 func renderRevenueByWeekTable(data []stat) {
 	textData := make([][]string, 0)
 	for _, d := range data {
-		textData = append(textData, []string{d.date, fmt.Sprintf("€ %f", d.revenue)})
+		textData = append(textData, []string{d.x, fmt.Sprintf("€ %f", d.y)})
 	}
 
 	tap.Table(
@@ -99,8 +100,8 @@ func renderRevenueByWeekGraph(data []stat) {
 		values = append(
 			values,
 			barchart.BarData{
-				Label:  dayAndValue.date,
-				Values: []barchart.BarValue{{Name: "Revenue", Value: dayAndValue.revenue, Style: blockStyle}}})
+				Label:  dayAndValue.x,
+				Values: []barchart.BarValue{{Name: "Revenue", Value: dayAndValue.y, Style: blockStyle}}})
 	}
 
 	bc := barchart.New(140, 15)
@@ -111,16 +112,14 @@ func renderRevenueByWeekGraph(data []stat) {
 	fmt.Println(bc.View())
 }
 
-func renderReturnRateByCategory() {
+func renderReturnRateByCategory(dataset *reporting.OrderDataset) {
 	fmt.Println("Revenue by day")
 	fmt.Println()
-	data := []stat{
-		{"Electronics>Phones>Android", 0.12},
-		{"Home>Kitchen>Coffee", 0.25},
-		{"Electronics>Laptops>Ultrabooks", 0.04},
-		{"Electronics>Phones>iPhone", 0.16},
-		{"Electronics>Wearables>Smartwatch", 0.18},
-		{"Electronics>Tablets>iPad", 0.8},
+
+	data := make([]stat, 0)
+
+	for _, c := range dataset.AllCategories() {
+		data = append(data, stat{string(c), dataset.ReturnRateByCategory(c)})
 	}
 
 	renderReturnRateByCategoryTable(data)
@@ -130,7 +129,7 @@ func renderReturnRateByCategory() {
 func renderReturnRateByCategoryTable(data []stat) {
 	textData := make([][]string, 0)
 	for _, d := range data {
-		textData = append(textData, []string{d.date, fmt.Sprintf("%d%%", (int)(100*d.revenue))})
+		textData = append(textData, []string{d.x, fmt.Sprintf("%d%%", (int)(100*d.y))})
 	}
 
 	tap.Table(
@@ -145,16 +144,19 @@ func renderReturnRateByCategoryGraph(data []stat) {
 		values = append(
 			values,
 			barchart.BarData{
-				Label:  dayAndValue.date,
-				Values: []barchart.BarValue{{Name: "Return rate", Value: dayAndValue.revenue, Style: blockStyle}}})
+				Label:  dayAndValue.x,
+				Values: []barchart.BarValue{{Name: "Return rate", Value: dayAndValue.y, Style: blockStyle}}})
 	}
 
 	bc := barchart.New(
 		140, 15,
-		barchart.WithDataSet(values),
-		barchart.WithHorizontalBars())
-	// bc.SetShowAxis(true)
-	// bc.PushAll(values)
+		barchart.WithDataSet(values))
+
+	// bc := barchart.New(
+	// 	140, len(data)*2,
+	// 	barchart.WithDataSet(values),
+	// 	barchart.WithHorizontalBars())
+
 	bc.Draw()
 
 	fmt.Println(bc.View())
