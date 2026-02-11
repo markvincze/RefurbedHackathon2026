@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
@@ -10,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	zone "github.com/lrstanley/bubblezone"
+	"github.com/yarlson/tap"
 )
 
 type model struct {
@@ -48,7 +50,30 @@ func (m model) View() string {
 }
 
 func main() {
-	// create new time series chart
+	tap.Intro("Welcome to order data visualizer!")
+
+	tap.Message("AOV: TODO")
+	tap.Message("Total revenue: TODO")
+	tap.Message("Delivery days median: TODO, p95: TODO")
+	tap.Message("Return rate: TODO")
+
+	options := []tap.SelectOption[string]{
+		{Value: "RevenueByDay", Label: "Revenue by day", Hint: ""},
+		{Value: "RevenueByWeek", Label: "Revenue by week", Hint: ""},
+		{Value: "ReturnRateByCategory", Label: "Return rate by category", Hint: ""},
+		{Value: "OrderCountByCategory", Label: "Order count by category and subcategory", Hint: ""},
+		{Value: "QueryBuilder", Label: "Query builder", Hint: "Create custom query"},
+	}
+
+	result := tap.Select[string](context.Background(), tap.SelectOptions[string]{
+		Message: "Select from the below options:",
+		Options: options,
+	})
+
+	fmt.Printf("You selected: %s\n", result)
+}
+
+func drawGraph() {
 	width := 30
 	height := 12
 	chart := tslc.New(width, height)
