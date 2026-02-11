@@ -48,8 +48,9 @@ type OrderDataset struct {
 	earliestOrderedAt time.Time
 	latestOrderedAt   time.Time
 
-	totalGross   decimal.Decimal
-	totalRevenue decimal.Decimal
+	totalGross    decimal.Decimal
+	totalRevenue  decimal.Decimal
+	totalReturned int64
 }
 
 type features struct {
@@ -102,6 +103,7 @@ func (ds *OrderDataset) add(item OrderItem) {
 
 	if !item.Refunded.IsZero() {
 		ds.features.returned.Add(uint32(itemID))
+		ds.totalReturned++
 	}
 	if ds.features.orderCategory == nil {
 		ds.features.orderCategory = map[Category]*roaring.Bitmap{}
@@ -163,6 +165,10 @@ func (ds *OrderDataset) AOV() decimal.Decimal {
 
 func (ds *OrderDataset) TotalRevenue() decimal.Decimal {
 	return ds.totalRevenue
+}
+
+func (ds *OrderDataset) ReturnRate() decimal.Decimal {
+	return decimal.NewFromInt(ds.totalReturned).Div(decimal.NewFromInt(int64(len(ds.allItems)))).Mul(decimal.NewFromInt(100))
 }
 
 type IntervalRevenue struct {
