@@ -21,6 +21,8 @@ func TestImportOrderDatasetFromCSV(t *testing.T) {
 	t.Log("NumOrders", dataset.NumOrders())
 	t.Log("AOV", dataset.AOV())
 	t.Log("Total revenue", dataset.TotalRevenue())
+	earliest, latest := dataset.DateRange()
+	t.Log(earliest, latest)
 
 	for _, cat := range dataset.AllCategories() {
 		t.Log("Orders By Category:", cat, dataset.NumOrdersByCategory(cat))
