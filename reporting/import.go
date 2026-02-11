@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"slices"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -157,6 +158,14 @@ func ImportOrderDatasetFromCSV(r io.Reader) (*OrderDataset, error) {
 		}
 		ds.add(orderItem)
 	}
+
+	deliveryDurations := make([]time.Duration, len(ds.deliveryDurations))
+	copy(deliveryDurations, ds.deliveryDurations)
+
+	sort.Slice(deliveryDurations, func(i, j int) bool {
+		return deliveryDurations[i] < deliveryDurations[j]
+	})
+	ds.sortedDeliveryDurations = deliveryDurations
 	return ds, nil
 }
 
