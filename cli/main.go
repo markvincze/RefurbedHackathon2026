@@ -39,7 +39,7 @@ func main() {
 
 		tap.Message(fmt.Sprintf("AOV: %v", dataset.AOV()))
 		tap.Message(fmt.Sprintf("Total revenue: € %.2f", dataset.TotalRevenue().InexactFloat64()))
-		tap.Message("Delivery days median: TODO, p95: TODO")
+		tap.Message(fmt.Sprintf("Delivery median: %v, p95: TODO", dataset.MedianDelivery()))
 		tap.Message(fmt.Sprintf("Return rate: %.2f%%", dataset.ReturnRate().InexactFloat64()))
 
 		options := []tap.SelectOption[string]{
