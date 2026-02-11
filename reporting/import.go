@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -111,8 +112,6 @@ func lookupFieldIndices(headerFields []string) ([]csvFieldIndex, error) {
 	return indices, nil
 }
 
-
-
 func ImportOrderDatasetFromCSV(r io.Reader) (*OrderDataset, error) {
 	csvr := csv.NewReader(r)
 
@@ -127,7 +126,7 @@ func ImportOrderDatasetFromCSV(r io.Reader) (*OrderDataset, error) {
 
 	ds := &OrderDataset{
 		allItems: make([]OrderItem, 0, 300_000),
-		orders: map[OrderID][]OrderItem{},
+		orders:   map[OrderID][]OrderItem{},
 	}
 	for {
 		fields, err := csvr.Read()
@@ -156,8 +155,7 @@ func ImportOrderDatasetFromCSV(r io.Reader) (*OrderDataset, error) {
 		if err != nil {
 			return nil, fmt.Errorf("parse order: %w", err)
 		}
-		ds.allItems = append(ds.allItems, orderItem)
-		ds.orders[orderItem.OrderID] = append(ds.orders[orderItem.OrderID], orderItem)
+		ds.add(orderItem)
 	}
 	return ds, nil
 }
@@ -165,6 +163,12 @@ func ImportOrderDatasetFromCSV(r io.Reader) (*OrderDataset, error) {
 func parseOrderItem(raw rawOrderItemRow) (OrderItem, error) {
 	errorf := func(format string, args ...any) (OrderItem, error) {
 		return OrderItem{}, fmt.Errorf(format, args...)
+	}
+	trimmedID := strings.TrimPrefix(raw.OrderID, "ORD-")
+
+	numericOrderID, err := strconv.ParseInt(trimmedID, 10, 32)
+	if err != nil {
+		return errorf("parse numeric order ID: %w", err)
 	}
 	parsedOrderedAt, err := time.Parse(time.RFC3339, raw.OrderedAt)
 	if err != nil {
@@ -199,19 +203,20 @@ func parseOrderItem(raw rawOrderItemRow) (OrderItem, error) {
 		}
 	}
 	return OrderItem{
-		OrderID:       OrderID(raw.OrderID),
-		OrderedAt:     parsedOrderedAt,
-		CustomerEmail: raw.CustomerEmail,
-		ItemName:      raw.ItemName,
-		ItemSpecs:     parseItemSpecs(raw.ItemSpecs),
-		ItemPrice:     parsedItemPrice,
-		Commission:    parsedCommission,
-		Refunded:      parsedRefunded,
-		PaymentStatus: raw.PaymentStatus,
-		Country:       raw.Country,
-		ShippedAt:     parsedShippedAt,
-		DeliveredAt:   parsedDeliveredAt,
-		Category:      parseCategoryPath(raw.Category),
+		OrderID:        OrderID(raw.OrderID),
+		NumericOrderID: int32(numericOrderID),
+		OrderedAt:      parsedOrderedAt,
+		CustomerEmail:  raw.CustomerEmail,
+		ItemName:       raw.ItemName,
+		ItemSpecs:      parseItemSpecs(raw.ItemSpecs),
+		ItemPrice:      parsedItemPrice,
+		Commission:     parsedCommission,
+		Refunded:       parsedRefunded,
+		PaymentStatus:  raw.PaymentStatus,
+		Country:        raw.Country,
+		ShippedAt:      parsedShippedAt,
+		DeliveredAt:    parsedDeliveredAt,
+		Category:       parseCategoryPath(raw.Category),
 	}, nil
 }
 
