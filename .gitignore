@@ -31,10 +31,9 @@ go.work.sum
 .env
 
 # Editor/IDE
-# .idea/
+.idea/
 # .vscode/
 
 # The dataset!
 reporting/orders_v3.csv
 cli/orders_v3.csv
-
