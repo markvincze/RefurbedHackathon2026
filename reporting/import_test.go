@@ -20,6 +20,7 @@ func TestImportOrderDatasetFromCSV(t *testing.T) {
 	t.Log("NumOrderItems", dataset.NumOrderItems())
 	t.Log("NumOrders", dataset.NumOrders())
 	t.Log("AOV", dataset.AOV())
+	t.Log("Total revenue", dataset.TotalRevenue())
 
 	for _, cat := range dataset.AllCategories() {
 		t.Log("Orders By Category:", cat, dataset.NumOrdersByCategory(cat))
