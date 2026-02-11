@@ -14,7 +14,7 @@ func main() {
 
 	for {
 		clearScreen()
-		tap.Intro("Welcome to the order data visualizer!")
+		tap.Intro("Welcome to the Order Data Visualizer!")
 
 		if dataset == nil {
 			spinner := tap.NewSpinner(tap.SpinnerOptions{})
@@ -38,9 +38,9 @@ func main() {
 		}
 
 		tap.Message(fmt.Sprintf("AOV: %v", dataset.AOV()))
-		tap.Message("Total revenue: TODO")
+		tap.Message(fmt.Sprintf("Total revenue: € %.2f", dataset.TotalRevenue().InexactFloat64()))
 		tap.Message("Delivery days median: TODO, p95: TODO")
-		tap.Message("Return rate: TODO")
+		tap.Message(fmt.Sprintf("Return rate: %.2f%%", dataset.ReturnRate().InexactFloat64()))
 
 		options := []tap.SelectOption[string]{
 			{Value: "RevenueByDay", Label: "Revenue by day", Hint: ""},
@@ -51,7 +51,7 @@ func main() {
 			{Value: "Quit", Label: "Quit"},
 		}
 
-		result := tap.Select[string](context.Background(), tap.SelectOptions[string]{
+		result := tap.Select(context.Background(), tap.SelectOptions[string]{
 			Message: "Select from the below options:",
 			Options: options,
 		})
