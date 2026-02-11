@@ -47,8 +47,9 @@ type OrderDataset struct {
 	features   features
 	categories map[Category]struct{}
 
-	aovOnce sync.Once
-	aov     decimal.Decimal
+	aovOnce      sync.Once
+	aov          decimal.Decimal
+	totalRevenue decimal.Decimal
 }
 
 type features struct {
@@ -77,6 +78,7 @@ func (ds *OrderDataset) add(item OrderItem) {
 	itemID := orderItemID(len(ds.allItems))
 	ds.allItems = append(ds.allItems, item)
 	ds.orders[item.OrderID] = append(ds.orders[item.OrderID], item)
+	ds.totalRevenue = ds.totalRevenue.Add(item.ItemPrice).Sub(item.Refunded)
 
 	if ds.features.returned == nil {
 		ds.features.returned = roaring.New()
@@ -156,11 +158,7 @@ func (ds *OrderDataset) AOV() decimal.Decimal {
 }
 
 func (ds *OrderDataset) TotalRevenue() decimal.Decimal {
-	var total decimal.Decimal
-	for item := range ds.AllItems() {
-		total = total.Add(item.ItemPrice).Sub(item.Refunded)
-	}
-	return total
+	return ds.totalRevenue
 }
 
 type IntervalRevenue struct {
